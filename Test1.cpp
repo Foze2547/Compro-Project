@@ -324,7 +324,7 @@ int main()
 			}
 		else if( op=='2') instructions();
 		else if( op=='3') {
-			printHighScores("C:\\Users\\HP Victus\\Desktop\\highscore.txt");
+			printHighScores("highscore.txt");
 		}
 		else if( op=='4') exit(0);
 		
