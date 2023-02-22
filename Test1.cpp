@@ -270,6 +270,9 @@ void play(){
 		birdPos += 1;
 		
 		if( birdPos > SCREEN_HEIGHT - 2 ){
+			int playerScore = score;
+			Player Player = {playerName, playerScore};
+			addPlayerScore("highscore.txt",Player);
 			gameover();
 			return;
 		}
@@ -294,9 +297,7 @@ void play(){
 		}
 		
 	}
-	int playerScore = score;
-	Player Player = {playerName, playerScore};
-	addPlayerScore("highscore.txt",Player);
+	
 }
 
 int main()
