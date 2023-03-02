@@ -1,0 +1,80 @@
+#include <iostream>
+#include <ifstream>
+#include <string>
+#include <map>
+using namespace std;
+
+void updateScoreFromFile(const string& filename){
+    //หาตำแหน่งไฟล์เพื่อเก็บรายชื่อและคะแนน
+    map<string, int> score;
+
+    //เปิดไฟล์เพื่ออ่านข้อมูลชื่อ
+    ifstream inFile(filename);
+    if(!inFile){
+        cerr << "Unable to open file " << filename << endl;
+        return;
+    }
+
+    //อ่านไฟล์ในแต่ละบรรทัด
+    string line;
+    while(getline(inFile, line)){
+        //แยกชื่อและคะแนนในแต่ละบรรทัด
+        string name;
+        int score;
+        istringstream iss(line);
+        if(!(iss >> name >> score)){
+            cerr << "Error reading line: " << line << endl;
+            continue;
+        }
+    
+
+    //เช็คว่าชื่อนั้นมีอยู่ในไฟล์นั้นหรือไม่
+    auto it = scores.find(name);
+    if(if != scores.end()){
+        //ถ้ามีชื่อนั้นอยู่แล้ว ให้เช็คคะแนนล่าสุดว่ามีค่ามากกว่าคะแนนเดิมหรือไม่
+        if(score > it->second){
+            //อัพเดทค่าคะแนนใหม่
+            it->second = score;
+            cout << "Updated score for " << name << " to " << score << endl;
+        }
+    }else{
+        //ในกรณีที่ชื่อนั้นยังไม่ได้อยู่ในไฟล์ ให้เพิ่มชื่อและเพิ่มคะแนนเข้าไปในไฟล์
+        scores[name] = score;
+        cout <<"Added " << name << " with score " << score << endl;
+        }    
+    }
+
+    //ปิดไฟล์
+    inFile.close();
+}
+
+//ใช้สร้างโครงสร้างข้อมูลแผนที่ที่เรียกว่า score ซึ่งใช้เพื่อจัดเก็บคู่ของประเภทสตริงและ int
+//map<string, int> score; 
+
+//เป็นการตรวจสอบว่าไฟล์ที่ระบุโดยชื่อไฟล์สามารถเปิดได้สำเร็จหรือไม่ หากไม่มี ข้อความแสดงข้อผิดพลาดจะถูกพิมพ์ไปยังสตรีมข้อผิดพลาดมาตรฐาน (cerr) และฟังก์ชันจะส่งคืน
+//if(!inFile){
+    //cerr << "Unable to open file " << filename << endl;
+    //return; 
+
+//ใช้แยกชื่อและคะแนนจากแต่ละบรรทัดโดยใช้ iststringstream หากมีข้อผิดพลาดขณะแยกชื่อและคะแนน (เช่น ฟิลด์ในบรรทัดมีไม่เพียงพอ) ข้อความแสดงข้อผิดพลาดจะถูกพิมพ์ไปยังสตรีมข้อผิดพลาดมาตรฐาน (cerr) และโปรแกรมจะข้ามไปยังบรรทัดถัดไปโดยใช้คำสั่งดำเนินการต่อ .
+//string name;
+//int score;
+//istringstream iss(line);
+//if(!(iss >> name >> score)){
+    //cerr << "Error reading line: " << line << endl;
+    //continue;
+
+//ขั้นตอนนี้จะค้นหา map คะแนนสำหรับรายการที่มีคีย์เท่ากับชื่อที่ดึงมาจากบรรทัดปัจจุบัน หากพบรายการดังกล่าว จะตั้งค่าเป็นloopวนซ้ำที่ชี้ไปที่รายการนั้น หากไม่มี จะตั้งค่าเป็นloopวนซ้ำจุดสิ้นสุดของ map คะแนน
+//auto it = scores.find(name);
+//if(if != scores.end()){
+
+//ถ้าชื่อที่แยกจากบรรทัด ณ ตอนนั้นมีอยู่แล้วใน map คะแนน ขั้นตอนนี้จะตรวจสอบว่าคะแนนที่แยกจากบรรทัดปัจจุบันมีค่ามากกว่าค่าปัจจุบันของคีย์ชื่อใน map หรือไม่ ถ้ามีค่ามากกว่า ค่าใน map จะถูกอัพเดตเป็นคะแนนที่ดึงมาจากบรรทัดปัจจุบัน และข้อความจะถูก cout
+//if(score > it->second){
+    //it->second = score;
+    //cout << "Updated score for " << name << " to " << score << endl;
+
+//ถ้าชื่อที่แยกจากบรรทัด ณ ตอนนั้น ไม่มีอยู่ใน map คะแนน ชื่อและคะแนนของคน ๆ นั้น จะถูกเพิ่มลงใน map และข้อความจะถูก (cout) ซึ่งระบุว่ามีการเพิ่มชื่อและคะแนนของคน ๆ นั้นแล้ว 
+//else{
+    //scores[name] = score;
+    //cout <<"Added " << name << " with score " << score << endl;
+
