@@ -1,13 +1,4 @@
-/*#include<iostream>
-#include<fstream>
-#include<string>
-#include<vector>
-#include<algorithm>
-using namespace std;*/
-//4.แสดงชื่อและคะแนนผู้เล่นโดยเรียงอันดับคะแนนมากไปน้อย
-
 void showRank(){
-//int main(){
 //เปิดไฟล์
   ifstream source;
   source.open("abc.txt");
@@ -46,5 +37,4 @@ void showRank(){
 //ปิดไฟล์
   source.close();
 
-  //return 0;
 }
