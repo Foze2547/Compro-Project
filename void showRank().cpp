@@ -6,6 +6,7 @@
 using namespace std;
 
 void showRank(){
+//int main(){
 //เปิดไฟล์
   ifstream source;
   source.open("abc.txt");
@@ -23,12 +24,12 @@ void showRank(){
 
 //เรียงลำดับมากไปน้อย ถ้าเท่ากันให้เรียงตามตัวอักษร
 //ใช้ sort()
-  sort(students.begin(), students.end(), []pair<string,int> a, pair<string,int> b) {
+  sort(students.begin(), students.end(), [](pair<string,int> a, pair<string,int> b) {
         if(a.second != b.second) {
             return a.second > b.second;
         }
         return a.first < b.first;
-    };
+    });
 
 //cout<<แสดงชื่อและคะแนน5อันดับแรก
   cout << "Top 5 scores:" << endl;
@@ -44,4 +45,5 @@ void showRank(){
 //ปิดไฟล์
   source.close();
 
+  //return 0;
 }
