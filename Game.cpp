@@ -2,9 +2,13 @@
 #include<conio.h>
 #include<dos.h>
 #include<stdlib.h>
+#include<string>
 #include<string.h>
+#include<sstream>
 #include<windows.h>
 #include<time.h>
+#include<vector>
+#include<algorithm>
 #include<fstream>
 #include<map>
 
@@ -58,6 +62,145 @@ void writeScoresToFile(string filename, map<string, int> scores) {
     }
 }
 
+void updateScoreFromFile(const string& filename){
+     //หาตำแหน่งไฟล์เพื่อเก็บรายชื่อและคะแนน
+    map<string, int> score;
+
+     //เปิดไฟล์เพื่ออ่านข้อมูลชื่อ
+    ifstream inFile(filename);
+    if (!inFile){
+        cerr << "Unable to open file " << filename << endl;
+        return;
+    }
+
+    //อ่านไฟล์ในแต่ละบรรทัด
+    string line;
+    while (getline(inFile, line)){
+        //แยกชื่อและคะแนนในแต่ละบรรทัด
+        string name;
+        int scoreValue;
+        if (istringstream(line) >> name >> scoreValue) {
+            //เช็คว่าชื่อนั้นมีอยู่ในไฟล์นั้นหรือไม่
+            auto it = score.find(name);
+            if (it != score.end()){
+                //ถ้ามีชื่อนั้นอยู่แล้ว ให้เช็คคะแนนล่าสุดว่ามีค่ามากกว่าคะแนนเดิมหรือไม่
+                if (scoreValue > it->second){
+                    //อัพเดทค่าคะแนนใหม่
+                    it->second = scoreValue;
+                    cout << "Updated score for " << name << " to " << scoreValue << endl;
+                }
+            } else {
+                //ในกรณีที่ชื่อนั้นยังไม่ได้อยู่ในไฟล์ ให้เพิ่มชื่อและเพิ่มคะแนนเข้าไปในไฟล์
+                score[name] = scoreValue;
+                cout <<"Added " << name << " with score " << scoreValue << endl;
+            }
+        } else {
+            cerr << "Error reading line: " << line << endl;
+            continue;
+        }
+    }
+
+    //ปิดไฟล์ 
+    inFile.close();
+}
+
+void showRank(){
+    // Open the file named "abc.txt" for reading
+    ifstream source;
+    source.open("abc.txt");
+
+    // Read the file line by line using getline()
+    // Use substr() to extract the name and score of each player
+    // Store the name and score in a vector named students
+    string textline;
+    vector<pair<string,int>> students;
+    while(getline(source, textline)) {
+        string name = textline.substr(0, textline.find("|"));
+        int score = stoi(textline.substr(textline.find("|")+1));
+        students.push_back({name, score});
+    }
+
+    // Sort the students vector in descending order of scores
+    // If the scores are equal, sort in ascending order of names
+    sort(students.begin(), students.end(), [](pair<string,int> a, pair<string,int> b) {
+        if(a.second != b.second) {
+            return a.second > b.second;
+        }
+        return a.first < b.first;
+    });
+
+    // Print the names and scores of the top 5 players from the sorted vector
+    cout << "Top 5 scores:" << endl;
+    int count = 0;
+    for(auto s : students) {
+        cout << count+1 << "." << s.first << "|" << s.second << endl;
+        count++;
+        if(count == 5) {
+            break;
+        }
+    }
+
+    // Close the file
+    source.close();
+}
+
+
+void hacheu() {
+    string filename = "abc.txt";
+    string searchName = "tonmoke";
+    bool isFound = false;
+
+    ifstream infile(filename);
+    string name_and_scores;
+
+    // อ่านชื่อตามลำดับของไฟล์และตรวจสอบว่าชื่อตรงกับชื่อที่ต้องการหรือไม่
+    while (getline(infile, name_and_scores)) {
+        const char* text = name_and_scores.c_str();
+        char format[]="%s %d";
+        char name[20];
+        int scores;
+        sscanf(text,format,name,&scores);
+        if (name == searchName) {
+            isFound = true;
+            break;
+        }
+    }
+
+    if (isFound) {
+        cout << "Found " << searchName << " in " << filename << endl;
+    } else {
+        cout << "Could not find " << searchName << " in " << filename << endl;
+    }
+
+    infile.close();
+}
+
+int longCheu()
+{
+    string name;
+    int score;
+
+    cout << "Enter name: ";
+    getline(cin, name);
+    cout << "Enter score: ";
+    cin >> score;
+
+    ofstream file("abc.txt");
+
+    if (!file.is_open()) {
+        cout << "Error opening file!" << endl;
+        return 1;
+    }
+
+    file << name << " " << score << endl;
+
+    file.close();
+
+    cout << "Score saved to file!" << endl;
+
+    return 0;
+}
+
 void addPlayerScore(string filename, Player player) {
     // Read current high scores from file
     map<string, int> scores = readScoresFromFile(filename);
@@ -77,6 +220,7 @@ void addPlayerScore(string filename, Player player) {
     // Write updated high scores table to file
     writeScoresToFile(filename, scores);
 }
+
 
 void printHighScores(string filename) {
     // Read current high scores from file
@@ -210,6 +354,10 @@ void instructions(){
 	cout<<"\n Press spacebar to make bird fly";
 	cout<<"\n\nPress any key to go back to menu";
 	getch();
+}
+
+string playername(string name){
+	return name ;
 }
 
 void play(){
