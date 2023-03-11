@@ -3,10 +3,13 @@
 #include<dos.h>
 #include<stdlib.h>
 #include<string.h>
+#include<string>
 #include<fstream>
 #include<windows.h>
 #include<time.h>
 #include<map>
+#include<vector>
+#include<algorithm>
 
 #define SCREEN_WIDTH 90
 #define SCREEN_HEIGHT 26
@@ -45,6 +48,10 @@ void setcursor(bool visible, DWORD size)
 	lpCursor.bVisible = visible;
 	lpCursor.dwSize = size;
 	SetConsoleCursorInfo(console,&lpCursor);
+}
+
+void updateScore(){
+	gotoxy(WIN_WIDTH + 7, 5);cout<<"Score: "<<score<<endl;
 }
 
 void drawBorder(){ 
@@ -115,18 +122,6 @@ void debug(){
 //	gotoxy(SCREEN_WIDTH + 3, 4); cout<<"Pipe Pos: "<<pipePos[0];
 	
 }
-void gameover(){
-	system("cls");
-	cout<<endl;
-	cout<<"\t\t--------------------------"<<endl;
-	cout<<"\t\t-------- Game Over -------"<<endl;
-	cout<<"\t\t--------------------------"<<endl<<endl;
-	cout<<"\t\tPress any key to go back to menu.";
-	getch();
-}
-void updateScore(){
-	gotoxy(WIN_WIDTH + 7, 5);cout<<"Score: "<<score<<endl;
-}
 
 void instructions(){
 	
@@ -139,38 +134,21 @@ void instructions(){
 }
 
 void updateScore1(string playerName, int score) {
-    // Open file for reading and writing
-    fstream file("abc.txt", ios::in | ios::out | ios::app);
+     ofstream outfile("abc.txt", ios::app);
 
-    bool foundPlayer = false;
-    string line;
-
-    // Search for player name in file
-    while (getline(file, line)) {
-        if (line.substr(0, playerName.length()) == playerName) {
-            // Update player score
-            int oldScore = stoi(line.substr(playerName.length() + 1));
-            int newScore = oldScore + score;
-            file.seekp(file.tellg() - line.length());
-            file << playerName << " " << newScore << endl;
-            foundPlayer = true;
-            break;
-        }
-    }
-
-    // If player not found, add new player with score
-    if (!foundPlayer) {
-        file << playerName << " " << score << endl;
-    }
+    // Write name and score to file
+    outfile << playerName << " " << score << endl;
 
     // Close file
-    file.close();
+    outfile.close();
 }
+
+
 
 void showTop5Scores() {
     // Open file for reading
     system("cls");
-    ifstream file("abc.txt");
+    ifstream file("C:\\Users\\HP Victus\\Desktop\\abc.txt");
 
     // Store player scores in a map
     map<int, string, greater<int>> scoreMap;
@@ -194,19 +172,79 @@ void showTop5Scores() {
     getch();
 }
 
+void gameover(){
+    system("cls");
+    cout<<endl;
+    cout<<"\t\t-------------------------------------------"<<endl;
+    cout<<"\t\t--------Game over! Your score is " << score << "--------" << endl;
+    cout<<"\t\t-------------------------------------------"<<endl<<endl;
+
+    // Prompt user to enter their name
+    cout << "\t\t\tGame over! Your score is " << score << endl;
+
+	// Prompt player to enter their name
+	cout << "\t\t\tEnter your name: ";
+	string playerName;
+	cin >> playerName;
+	// Update scores file
+	updateScore1(playerName, score);
+
+
+    cout<<"\t\tPress any key to go back to menu....";
+    getch();
+}
+
+void printLeaderboard() {
+    // Open file for reading
+	system("cls");
+    ifstream infile("abc.txt");
+
+    // Create a map to store player names and scores
+    map<string, int> scores;
+
+    string line;
+    while (getline(infile, line)) {
+        // Extract player name and score from line
+        string name = line.substr(0, line.find(" "));
+        int score = stoi(line.substr(line.find(" ") + 1));
+
+        // If the name already exists in the map, update score if new score is higher
+        if (scores.find(name) != scores.end()) {
+            int existingScore = scores[name];
+            if (score > existingScore) {
+                scores[name] = score;
+            }
+        }
+        // If the name does not exist in the map, add it with the score
+        else {
+            scores[name] = score;
+        }
+    }
+
+    // Sort players by score in descending order
+    vector<pair<string, int>> sortedScores;
+    for (auto it = scores.begin(); it != scores.end(); ++it) {
+        sortedScores.push_back(make_pair(it->first, it->second));
+    }
+    sort(sortedScores.begin(), sortedScores.end(), [](pair<string, int> a, pair<string, int> b) { return a.second > b.second; });
+
+    // Print leaderboard
+    cout << "LEADERBOARD" << endl;
+    for (int i = 0; i < sortedScores.size() && i < 5; ++i) {
+        cout << i+1 << ". " << sortedScores[i].first << " : " << sortedScores[i].second << " Point"<< endl;
+    }
+
+    // Close file
+    infile.close();
+	getch();
+}
+
 void play(){
-	string PlayerName;
 	birdPos = 6;
 	score = 0;
 	pipeFlag[0] = 1; 
 	pipeFlag[1] = 0;
 	pipePos[0] = pipePos[1] = 4;
-
-	system("cls");
-	cout<<"Enter your name\n";
-	cin>>PlayerName;
-	cout<<"\nPress any key to Play Game";
-	
 	system("cls"); 
 	drawBorder();
 	genPipe(0);
@@ -269,7 +307,6 @@ void play(){
 		if( pipePos[0] > 68 ){
 			score++;
 			updateScore();
-			updateScore1(PlayerName,score);
 			pipeFlag[1] = 0;
 			pipePos[0] = pipePos[1];
 			gapPos[0] = gapPos[1];
@@ -300,7 +337,7 @@ int main()
 		
 		if( op=='1') play();
 		else if( op=='2') instructions();
-		else if( op=='3') showTop5Scores();
+		else if( op=='3') printLeaderboard();
 		else if( op=='4') exit(0);
 		
 	}while(1);
