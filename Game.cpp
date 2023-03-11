@@ -2,15 +2,14 @@
 #include<conio.h>
 #include<dos.h>
 #include<stdlib.h>
-#include<string>
 #include<string.h>
-#include<sstream>
+#include<string>
+#include<fstream>
 #include<windows.h>
 #include<time.h>
+#include<map>
 #include<vector>
 #include<algorithm>
-#include<fstream>
-#include<map>
 
 #define SCREEN_WIDTH 90
 #define SCREEN_HEIGHT 26
@@ -33,214 +32,6 @@ char bird[2][6] = { '/','-','-','o','\\',' ',
 int birdPos = 6;
 int score = 0;
 
-struct Player{
-    string name;
-    int score;
-};
-
-map<string, int> readScoresFromFile(string filename) {
-    map<string, int> scores;
-    ifstream file(filename);
-    if (file.is_open()) {
-        string name;
-        int score;
-        while (file >> name >> score) {
-            scores[name] = score;
-        }
-        file.close();
-    }
-    return scores;
-}
-
-void writeScoresToFile(string filename, map<string, int> scores) {
-    ofstream file(filename);
-    if (file.is_open()) {
-        for (auto const& [name, score] : scores) {
-            file << name << " " << score << endl;
-        }
-        file.close();
-    }
-}
-
-void updateScoreFromFile(const string& filename){
-     //หาตำแหน่งไฟล์เพื่อเก็บรายชื่อและคะแนน
-    map<string, int> score;
-
-     //เปิดไฟล์เพื่ออ่านข้อมูลชื่อ
-    ifstream inFile(filename);
-    if (!inFile){
-        cerr << "Unable to open file " << filename << endl;
-        return;
-    }
-
-    //อ่านไฟล์ในแต่ละบรรทัด
-    string line;
-    while (getline(inFile, line)){
-        //แยกชื่อและคะแนนในแต่ละบรรทัด
-        string name;
-        int scoreValue;
-        if (istringstream(line) >> name >> scoreValue) {
-            //เช็คว่าชื่อนั้นมีอยู่ในไฟล์นั้นหรือไม่
-            auto it = score.find(name);
-            if (it != score.end()){
-                //ถ้ามีชื่อนั้นอยู่แล้ว ให้เช็คคะแนนล่าสุดว่ามีค่ามากกว่าคะแนนเดิมหรือไม่
-                if (scoreValue > it->second){
-                    //อัพเดทค่าคะแนนใหม่
-                    it->second = scoreValue;
-                    cout << "Updated score for " << name << " to " << scoreValue << endl;
-                }
-            } else {
-                //ในกรณีที่ชื่อนั้นยังไม่ได้อยู่ในไฟล์ ให้เพิ่มชื่อและเพิ่มคะแนนเข้าไปในไฟล์
-                score[name] = scoreValue;
-                cout <<"Added " << name << " with score " << scoreValue << endl;
-            }
-        } else {
-            cerr << "Error reading line: " << line << endl;
-            continue;
-        }
-    }
-
-    //ปิดไฟล์ 
-    inFile.close();
-}
-
-void showRank(){
-    // Open the file named "abc.txt" for reading
-    ifstream source;
-    source.open("abc.txt");
-
-    // Read the file line by line using getline()
-    // Use substr() to extract the name and score of each player
-    // Store the name and score in a vector named students
-    string textline;
-    vector<pair<string,int>> students;
-    while(getline(source, textline)) {
-        string name = textline.substr(0, textline.find("|"));
-        int score = stoi(textline.substr(textline.find("|")+1));
-        students.push_back({name, score});
-    }
-
-    // Sort the students vector in descending order of scores
-    // If the scores are equal, sort in ascending order of names
-    sort(students.begin(), students.end(), [](pair<string,int> a, pair<string,int> b) {
-        if(a.second != b.second) {
-            return a.second > b.second;
-        }
-        return a.first < b.first;
-    });
-
-    // Print the names and scores of the top 5 players from the sorted vector
-    cout << "Top 5 scores:" << endl;
-    int count = 0;
-    for(auto s : students) {
-        cout << count+1 << "." << s.first << "|" << s.second << endl;
-        count++;
-        if(count == 5) {
-            break;
-        }
-    }
-
-    // Close the file
-    source.close();
-}
-
-
-void hacheu() {
-    string filename = "abc.txt";
-    string searchName = "tonmoke";
-    bool isFound = false;
-
-    ifstream infile(filename);
-    string name_and_scores;
-
-    // อ่านชื่อตามลำดับของไฟล์และตรวจสอบว่าชื่อตรงกับชื่อที่ต้องการหรือไม่
-    while (getline(infile, name_and_scores)) {
-        const char* text = name_and_scores.c_str();
-        char format[]="%s %d";
-        char name[20];
-        int scores;
-        sscanf(text,format,name,&scores);
-        if (name == searchName) {
-            isFound = true;
-            break;
-        }
-    }
-
-    if (isFound) {
-        cout << "Found " << searchName << " in " << filename << endl;
-    } else {
-        cout << "Could not find " << searchName << " in " << filename << endl;
-    }
-
-    infile.close();
-}
-
-int longCheu()
-{
-    string name;
-    int score;
-
-    cout << "Enter name: ";
-    getline(cin, name);
-    cout << "Enter score: ";
-    cin >> score;
-
-    ofstream file("abc.txt");
-
-    if (!file.is_open()) {
-        cout << "Error opening file!" << endl;
-        return 1;
-    }
-
-    file << name << " " << score << endl;
-
-    file.close();
-
-    cout << "Score saved to file!" << endl;
-
-    return 0;
-}
-
-void addPlayerScore(string filename, Player player) {
-    // Read current high scores from file
-    map<string, int> scores = readScoresFromFile(filename);
-
-    // Check if player is already in high scores table
-    auto it = scores.find(player.name);
-    if (it != scores.end()) {
-        // Player is already in high scores table, update their score if it's higher
-        if (player.score > it->second) {
-            it->second = player.score;
-        }
-    } else {
-        // Player is not in high scores table, add them with their score
-        scores[player.name] = player.score;
-    }
-
-    // Write updated high scores table to file
-    writeScoresToFile(filename, scores);
-}
-
-
-void printHighScores(string filename) {
-    // Read current high scores from file
-    map<string, int> scores = readScoresFromFile(filename);
-
-    // Sort high scores by score in descending order
-    multimap<int, string, greater<int>> sortedScores;
-    for (auto const& [name, score] : scores) {
-        sortedScores.insert(make_pair(score, name));
-    }
-
-    // Print high scores table
-    cout << "High Scores:\n";
-    int rank = 1;
-    for (auto const& [score, name] : sortedScores) {
-        cout << rank << ". " << name << " - " << score << endl;
-        rank++;
-    }
-}
-
 void gotoxy(int x, int y)
 {
 	CursorPosition.X = x;
@@ -259,6 +50,10 @@ void setcursor(bool visible, DWORD size)
 	SetConsoleCursorInfo(console,&lpCursor);
 }
 
+void updateScore(){
+	gotoxy(WIN_WIDTH + 7, 5);cout<<"Score: "<<score<<endl;
+}
+
 void drawBorder(){ 
 	
 	for(int i=0; i<SCREEN_WIDTH; i++){
@@ -274,11 +69,9 @@ void drawBorder(){
 		gotoxy(WIN_WIDTH,i); cout<<"�";
 	}
 }
-
 void genPipe(int ind){
 	gapPos[ind] = 3 + rand()%14; 
 }
-
 void drawPipe(int ind){
 	if( pipeFlag[ind] == true ){
 		for(int i=0; i<gapPos[ind]; i++){ 
@@ -289,7 +82,6 @@ void drawPipe(int ind){
 		}
 	} 
 }
-
 void erasePipe(int ind){
 	if( pipeFlag[ind] == true ){
 		for(int i=0; i<gapPos[ind]; i++){ 
@@ -308,7 +100,6 @@ void drawBird(){
 		}
 	}
 }
-
 void eraseBird(){
 	for(int i=0; i<2; i++){
 		for(int j=0; j<6; j++){
@@ -327,23 +118,9 @@ int collision(){
 	}
 	return 0;
 }
-
 void debug(){
 //	gotoxy(SCREEN_WIDTH + 3, 4); cout<<"Pipe Pos: "<<pipePos[0];
 	
-}
-void gameover(){
-	system("cls");
-	cout<<endl;
-	cout<<"\t\t--------------------------"<<endl;
-	cout<<"\t\t-------- Game Over -------"<<endl;
-	cout<<"\t\t--------------------------"<<endl<<endl;
-	cout<<"\t\tPress any key to go back to menu.";
-	getch();
-}
-
-void updateScore(){
-	gotoxy(WIN_WIDTH + 7, 5);cout<<"Score: "<<score<<endl;
 }
 
 void instructions(){
@@ -356,25 +133,120 @@ void instructions(){
 	getch();
 }
 
-string playername(string name){
-	return name ;
+void updateScore1(string playerName, int score) {
+     ofstream outfile("abc.txt", ios::app);
+
+    // Write name and score to file
+    outfile << playerName << " " << score << endl;
+
+    // Close file
+    outfile.close();
+}
+
+
+
+void showTop5Scores() {
+    // Open file for reading
+    system("cls");
+    ifstream file("C:\\Users\\HP Victus\\Desktop\\abc.txt");
+
+    // Store player scores in a map
+    map<int, string, greater<int>> scoreMap;
+    string line;
+    while (getline(file, line)) {
+        string playerName = line.substr(0, line.find(' '));
+        int score = stoi(line.substr(line.find(' ') + 1));
+        scoreMap[score] = playerName;
+    }
+
+    // Print top 5 scores
+    int count = 0;
+    system("cls");
+    cout << "Top 5 Scores:" << endl;
+    for (auto it = scoreMap.begin(); it != scoreMap.end() && count < 5; ++it, ++count) {
+        cout << count+1 << ". " << it->second << " - " << it->first << " points" << endl;
+    }
+
+    // Close file
+    file.close();
+    getch();
+}
+
+void gameover(){
+    system("cls");
+    cout<<endl;
+    cout<<"\t\t-------------------------------------------"<<endl;
+    cout<<"\t\t--------Game over! Your score is " << score << "--------" << endl;
+    cout<<"\t\t-------------------------------------------"<<endl<<endl;
+
+    // Prompt user to enter their name
+    cout << "\t\t\tGame over! Your score is " << score << endl;
+
+	// Prompt player to enter their name
+	cout << "\t\t\tEnter your name: ";
+	string playerName;
+	cin >> playerName;
+	// Update scores file
+	updateScore1(playerName, score);
+
+
+    cout<<"\t\tPress any key to go back to menu....";
+    getch();
+}
+
+void printLeaderboard() {
+    // Open file for reading
+	system("cls");
+    ifstream infile("abc.txt");
+
+    // Create a map to store player names and scores
+    map<string, int> scores;
+
+    string line;
+    while (getline(infile, line)) {
+        // Extract player name and score from line
+        string name = line.substr(0, line.find(" "));
+        int score = stoi(line.substr(line.find(" ") + 1));
+
+        // If the name already exists in the map, update score if new score is higher
+        if (scores.find(name) != scores.end()) {
+            int existingScore = scores[name];
+            if (score > existingScore) {
+                scores[name] = score;
+            }
+        }
+        // If the name does not exist in the map, add it with the score
+        else {
+            scores[name] = score;
+        }
+    }
+
+    // Sort players by score in descending order
+    vector<pair<string, int>> sortedScores;
+    for (auto it = scores.begin(); it != scores.end(); ++it) {
+        sortedScores.push_back(make_pair(it->first, it->second));
+    }
+    sort(sortedScores.begin(), sortedScores.end(), [](pair<string, int> a, pair<string, int> b) { return a.second > b.second; });
+
+    // Print leaderboard
+    cout << "LEADERBOARD" << endl;
+    for (int i = 0; i < sortedScores.size() && i < 5; ++i) {
+        cout << i+1 << ". " << sortedScores[i].first << " : " << sortedScores[i].second << " Point"<< endl;
+    }
+
+    // Close file
+    infile.close();
+	getch();
 }
 
 void play(){
-	
-	string playerName;
+	int speed = 100;
 	birdPos = 6;
 	score = 0;
 	pipeFlag[0] = 1; 
 	pipeFlag[1] = 0;
 	pipePos[0] = pipePos[1] = 4;
-
-	system("cls");
-	cout<<"Enter your name\n";
-	cin>>playerName;
-	cout<<"\nPress any key to Play Game";
-
-	system("cls");
+	system("cls"); 
 	drawBorder();
 	genPipe(0);
 	updateScore();
@@ -399,7 +271,7 @@ void play(){
 					birdPos-=3;
 			} 
 			if(ch==27){
-				break;
+				exit(0);
 			}
 		}
 		
@@ -411,16 +283,13 @@ void play(){
 			gameover();
 			return;
 		}
-		Sleep(100);
+		Sleep(speed);
 		eraseBird();
 		erasePipe(0);
 		erasePipe(1);
 		birdPos += 1;
 		
 		if( birdPos > SCREEN_HEIGHT - 2 ){
-			int playerScore = score;
-			Player Player = {playerName, playerScore};
-			addPlayerScore("highscore.txt",Player);
 			gameover();
 			return;
 		}
@@ -438,21 +307,21 @@ void play(){
 		}
 		if( pipePos[0] > 68 ){
 			score++;
+			speed--;
 			updateScore();
 			pipeFlag[1] = 0;
 			pipePos[0] = pipePos[1];
 			gapPos[0] = gapPos[1];
 		}
-		
 	}
-	
+	 
 }
 
 int main()
 {
 	setcursor(0,0); 
 	srand( (unsigned)time(NULL)); 
-    int playerScore = 0;
+	
 //	play();
 	
 	do{
@@ -462,19 +331,14 @@ int main()
 		gotoxy(10,7); cout<<" --------------------------";
 		gotoxy(10,9); cout<<"1. Start Game";
 		gotoxy(10,10); cout<<"2. Instructions";	 
-		gotoxy(10,11); cout<<"3. Scoreboard";
+		gotoxy(10,11); cout<<"3. Ranking";
 		gotoxy(10,12); cout<<"4. Quit";
 		gotoxy(10,14); cout<<"Select option: ";
 		char op = getche();
 		
-		if( op=='1') {
-			Player();
-			play();
-			}
+		if( op=='1') play();
 		else if( op=='2') instructions();
-		else if( op=='3') {
-			printHighScores("highscore.txt");
-		}
+		else if( op=='3') printLeaderboard();
 		else if( op=='4') exit(0);
 		
 	}while(1);
