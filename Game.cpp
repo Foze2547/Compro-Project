@@ -19,7 +19,6 @@
 #define PIPE_DIF 45
 
 using namespace std;
-//		cout<<"���������";
  
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 COORD CursorPosition;
@@ -57,16 +56,16 @@ void updateScore(){
 void drawBorder(){ 
 	
 	for(int i=0; i<SCREEN_WIDTH; i++){
-		gotoxy(i,0); cout<<"�";
-		gotoxy(i,SCREEN_HEIGHT); cout<<"�";
+		gotoxy(i,0); cout<<"X";
+		gotoxy(i,SCREEN_HEIGHT); cout<<"X";
 	}
 	
 	for(int i=0; i<SCREEN_HEIGHT; i++){
-		gotoxy(0,i); cout<<"�";
-		gotoxy(SCREEN_WIDTH,i); cout<<"�";
+		gotoxy(0,i); cout<<"X";
+		gotoxy(SCREEN_WIDTH,i); cout<<"X";
 	}
 	for(int i=0; i<SCREEN_HEIGHT; i++){
-		gotoxy(WIN_WIDTH,i); cout<<"�";
+		gotoxy(WIN_WIDTH,i); cout<<"X";
 	}
 }
 void genPipe(int ind){
@@ -111,16 +110,10 @@ void eraseBird(){
 int collision(){
 	if( pipePos[0] >= 61  ){
 		if( birdPos<gapPos[0] || birdPos >gapPos[0]+GAP_SIZE ){
-//			cout<< " HIT ";
-//			getch();
 			return 1;
 		}
 	}
 	return 0;
-}
-void debug(){
-//	gotoxy(SCREEN_WIDTH + 3, 4); cout<<"Pipe Pos: "<<pipePos[0];
-	
 }
 
 void instructions(){
@@ -141,35 +134,6 @@ void updateScore1(string playerName, int score) {
 
     // Close file
     outfile.close();
-}
-
-
-
-void showTop5Scores() {
-    // Open file for reading
-    system("cls");
-    ifstream file("C:\\Users\\HP Victus\\Desktop\\abc.txt");
-
-    // Store player scores in a map
-    map<int, string, greater<int>> scoreMap;
-    string line;
-    while (getline(file, line)) {
-        string playerName = line.substr(0, line.find(' '));
-        int score = stoi(line.substr(line.find(' ') + 1));
-        scoreMap[score] = playerName;
-    }
-
-    // Print top 5 scores
-    int count = 0;
-    system("cls");
-    cout << "Top 5 Scores:" << endl;
-    for (auto it = scoreMap.begin(); it != scoreMap.end() && count < 5; ++it, ++count) {
-        cout << count+1 << ". " << it->second << " - " << it->first << " points" << endl;
-    }
-
-    // Close file
-    file.close();
-    getch();
 }
 
 void gameover(){
@@ -278,7 +242,6 @@ void play(){
 		drawBird();
 		drawPipe(0);
 		drawPipe(1);
-		debug();
 		if( collision() == 1 ){
 			gameover();
 			return;
